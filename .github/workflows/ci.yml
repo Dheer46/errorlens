@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - name: Ruff
+        run: ruff check .
+      - name: Mypy
+        run: mypy
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        include:
+          - os: windows-latest
+            python-version: "3.12"
+          - os: macos-latest
+            python-version: "3.12"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[test]"
+      - name: Pytest
+        run: pytest
+      - name: Examples
+        run: |
+          python examples/classification_demo.py
+          python examples/pdf_report_demo.py
+
+  core-only:
+    # The analysis engine must work without the optional plotting / PDF dependencies.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e . pytest
+      - name: Core smoke test
+        run: |
+          python - <<'PY'
+          import numpy as np, pandas as pd
+          from errorlens import ErrorLens, MissingDependencyError
+          rng = np.random.default_rng(0)
+          X = pd.DataFrame({"a": rng.normal(size=2000), "b": rng.choice(list("xyz"), 2000)})
+          y = rng.integers(0, 2, 2000)
+          y_pred = np.where((X.a > 1) & (rng.random(2000) < .6), 1 - y, y)
+          r = ErrorLens.from_predictions(X, y, y_pred).analyze()
+          assert r.patterns
+          r.to_json("r.json"); r.to_markdown("r.md"); r.to_html("r.html")
+          try:
+              r.to_pdf("r.pdf")
+          except MissingDependencyError as e:
+              assert "errorlens[pdf]" in str(e)
+          else:
+              raise SystemExit("expected MissingDependencyError")
+          PY
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
+      - run: python -m build
+      - run: twine check dist/*

@@ -1,0 +1,1 @@
+"""ErrorLens cli subpackage."""
