@@ -6,7 +6,7 @@ contribution that makes a reported number more trustworthy is worth more than a 
 ## Development setup
 
 ```bash
-git clone https://github.com/errorlens/errorlens
+git clone https://github.com/Dheer46/errorlens
 cd errorlens
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
