@@ -13,3 +13,6 @@ venv/
 htmlcov/
 examples/output/
 *.pkl
+prof
+prof2
+*.prof
