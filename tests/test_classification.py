@@ -98,7 +98,7 @@ def test_balanced_classification_with_real_model():
     rng = np.random.default_rng(41)
     X = make_features(n, 41)
     score = 0.00005 * (X["income"] - 40000) + 0.15 * X["account_age"] - 1.5
-    y = (score + rng.normal(0, 0.6, n) > 0).astype(int).to_numpy()
+    y = (score + rng.normal(0, 0.6, n) > 0).astype(int).to_numpy().copy()
     hard = ((X["age"] < 25) & (X["income"] < 30000)).to_numpy()
     y[hard] = 1 - y[hard]  # concept differs in a subgroup absent from the training data
     model = make_pipeline(
