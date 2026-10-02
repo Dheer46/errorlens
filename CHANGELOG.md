@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] — 2026-10-02
+
+### Fixed
+- Test suite compatibility with pandas 3 (read-only arrays from `to_numpy()`).
+
+### Notes
+- First release on PyPI. The `0.1.0` filename was unavailable on PyPI (previously used and
+  deleted), so the initial public release is `0.1.1`; the library code is identical.
+
 ## [0.1.0] — 2026-10-02
 
 ### Added
